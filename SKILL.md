@@ -2,8 +2,9 @@
 name: investment-analysis
 description: 通用投资分析框架 V0.1 - 支持A股/港股/美股的深度价值投资分析，含多层数据降级、数据验证、大师三视角
 tags: [投资研究, A股, 港股, 美股, 价值投资, 技术分析]
-author: Kenny + Hermes
+author: Kenny Wu 
 version: 0.1.0
+license: MIT
 ---
 
 # 通用投资分析框架 V0.1
@@ -142,12 +143,20 @@ python tools/data_validator.py price '{抓取的数据JSON}'
 ### 本地执行环境与工具降级注意
 
 - 若系统 `python` 不存在或依赖缺失，优先使用 skill 目录内虚拟环境：`/Users/wuxiaogang/.hermes/skills/research/investment-skill/.venv/bin/python`。该 venv 通常已安装 `yfinance`、`akshare`、`requests`、`pandas`、`numpy`、`pdfminer.six` 等研报工具依赖。
-- `tools/data_validator.py report <symbol> <market>` 内部会通过子进程调用字面量 `python`。若系统无 `python`，运行时把 venv 放入 PATH：
+- ⚠️ **venv 可能不存在**（已在实战中复现）：若 `.venv/bin/python` 报 "No such file or directory"，直接用系统 python3 安装缺失依赖：
+  ```bash
+  pip3 install yfinance akshare requests pandas numpy pdfminer.six --break-system-packages -q
+  ```
+  一次安装后本 session 全程可用，无需重复尝试 venv 路径。
+- `data_validator.py report <symbol> <market>` 内部会通过子进程调用字面量 `python`。若系统无 `python`，运行时把 venv 放入 PATH：
   ```bash
   cd /Users/wuxiaogang/.hermes/skills/research/investment-skill
   PATH="$PWD/.venv/bin:$PATH" .venv/bin/python tools/data_validator.py report 00700 hk
   ```
-- Hermes terminal 对前台命令中的 `&` 可能触发“backgrounding”安全拦截，即使 `&` 出现在 here-doc 文本里（如 `FinTech & Business Services`）。生成长报告时优先用 `write_file` 写入 Python 脚本，再用终端执行脚本，避免在 shell here-doc 中直接塞大段正文。
+  若 venv 不存在，则用 `python3 tools/data_validator.py ...` 代替，只要系统 python3 已安装依赖即可正常运行。
+- Hermes terminal 对前台命令中的 `&` 可能触发"backgrounding"安全拦截，即使 `&` 出现在 here-doc 文本里（如 `FinTech & Business Services`）。生成长报告时优先用 `write_file` 写入 Python 脚本，再用终端执行脚本，避免在 shell here-doc 中直接塞大段正文。
+- ⚠️ **macOS 无 `timeout` 命令**（已复现）：`timeout 30 python3 ...` 会报 "command not found"。替代方案：直接运行命令（大多数分析工具在30秒内完成），或用 `gtimeout`（需 `brew install coreutils`）。`technical_indicators.py analyze` 的周线/月线分析通常在10-20秒内完成，直接运行即可，不必加 timeout。
+- ⚠️ **`execute_code` 工具缺少 pandas 等依赖**：execute_code sandbox 与系统 python3 环境隔离，pip3 --break-system-packages 安装的包在 execute_code 中不可用。技术指标计算必须通过 `terminal` 调用 `python3 tools/technical_indicators.py`，不要在 execute_code 中 import。
 - ⚠️ write_file 大文件 stall 风险：单次写入完整长报告会 stall（已在腾讯报告中复现）。按批次 A/B/C/D/E 分五次写入，首次建立文件，后续 append；单次上限约 800 行正文。
 
 ### WebSearch/WebFetch 失败时的官方文件降级
@@ -168,6 +177,8 @@ python tools/data_validator.py price '{抓取的数据JSON}'
 4. 电话会 Q&A 若只有 webcast、无稳定 transcript 文本，明确写「Q&A关键问答：数据缺失，本项跳过」，但仍必须提取 Earnings Release 中管理层原话、Business Review/Outlook、分部增速、回购/分红/Capex/FCF。
 
 详见 `references/tencent-official-ir-fallback.md`（腾讯/港股互联网官方 IR 文件降级案例）。
+另见 `references/hk-ir-curl-fallback.md`（已验证的 curl + pdfminer 完整流程，含腾讯 FY2025 真实 PDF URL）。
+另见 `references/tencent-fy2025-ir-artifacts.md`（2026-05-02 实测：腾讯 FY2025 官方 PDF/XLS URL、curl 抓取命令、关键事实与报告填充注意）。
 
 ### 数据缺失应对
 
