@@ -77,8 +77,8 @@
 
 ```text
 investment-analysis/
-├── SKILL.md                         # Hermes skill 主说明与执行流程
-├── README.md                        # GitHub 项目说明
+├── SKILL.md                         # Skill 主流程（精简版，聚焦执行步骤）
+├── README.md                        # 项目说明
 ├── tools/
 │   ├── market_identifier.py         # 市场识别
 │   ├── data_fetcher_v2.py           # 多市场数据抓取与降级
@@ -87,23 +87,25 @@ investment-analysis/
 │   ├── technical_indicators.py      # MA、RSI、MACD、Boll、关键价位
 │   └── report_validator.py          # 报告结构完整性校验
 └── references/
+    ├── data-fallback-rules.md       # L3 降级规则：URL、搜索词、curl 流程（SKILL.md 按需查阅）
+    ├── env-setup.md                 # Python 环境配置与平台 workaround（SKILL.md 按需查阅）
+    ├── data-reliability-guide.md    # 数据源可靠性评级与选型指南
+    ├── data-sources.md              # 数据抓取代码参考
     ├── report-template.md           # 完整报告模板
     ├── checklist.md                 # 交付前检查清单
-    ├── data-sources.md              # 数据抓取代码参考
-    ├── data-reliability-guide.md    # 数据可靠性与降级策略
-    ├── hk-ir-curl-fallback.md       # 港股 IR curl/PDF 降级案例
     └── modules/
-        ├── mod_00_summary.md        # 投资摘要
-        ├── mod_01_macro.md          # 全球宏观扫描
-        ├── mod_02_financials.md     # 财报核心数据
-        ├── mod_03_business.md       # 业务与护城河
-        ├── mod_04_comps.md          # 横向竞对分析
-        ├── mod_05_valuation.md      # 估值预测
-        ├── mod_06_technical.md      # 技术分析
-        ├── mod_07_masters.md        # 大师三视角
-        ├── mod_08_decision.md       # 投资裁决
-        ├── mod_09_risks.md          # 失效清单
-        └── mod_10_position.md       # 仓位管理
+        ├── mod_00_summary.md        # 投资摘要（模板）
+        ├── mod_01_macro.md          # 全球宏观扫描（模板）
+        ├── mod_02_financials.md     # 财报核心数据（模板）
+        ├── mod_03_business.md       # 业务与护城河（模板）
+        ├── mod_04_comps.md          # 横向竞对分析（模板）
+        ├── mod_05_valuation.md      # 估值预测（模板）
+        ├── mod_06_technical.md      # 技术分析（模板）
+        ├── mod_07_masters.md        # 大师三视角（模板）
+        ├── mod_08_decision.md       # 投资裁决（模板）
+        ├── mod_09_risks.md          # 失效清单（模板）
+        ├── mod_10_position.md       # 仓位管理（模板）
+        └── mod_*_filled.md          # 各模块已填充示例（供参考）
 ```
 
 ## 快速开始
@@ -296,7 +298,7 @@ print(df.head())
 
 ## 开发与维护建议
 
-- 新增数据源时，优先写入 `tools/data_fetcher_v2.py`，并在 `references/data-reliability-guide.md` 中说明降级规则。
+- 新增数据源时，优先写入 `tools/data_fetcher_v2.py`；降级 URL / 搜索词更新至 `references/data-fallback-rules.md`，可靠性评级更新至 `references/data-reliability-guide.md`。
 - 新增报告章节时，同步更新 `references/report-template.md`、`references/modules/` 和 `tools/report_validator.py`。
 - 新增估值模型时，补充 `valuation_calculator.py` 并在 README 中给出最小示例。
 - 每次工具逻辑变化后，用真实标的至少跑一遍 A 股、港股或美股样例。
